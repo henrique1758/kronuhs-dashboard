@@ -7,6 +7,8 @@ import {
   Users,
 } from 'phosphor-react'
 import { useState } from 'react'
+import { useIs } from '../../hooks'
+import { CanSeeComponent } from '../CanSeeComponent'
 import { SignOutModal } from '../SignOutModal'
 import { Link } from './Link'
 
@@ -19,6 +21,14 @@ import {
 
 export function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const userCanAccessPage = useIs({
+    roles: [
+      {
+        name: 'admin'
+      }
+    ]
+  })
 
   function handleOpenModal() {
     setIsModalOpen(true)
@@ -40,17 +50,21 @@ export function Sidebar() {
             <span>Painel</span>
           </Link>
 
-          <Link path="/users">
-            <Users size={24} />
+          <CanSeeComponent roles={[ { name: 'admin' } ]}>
+            <Link path="/users">
+              <Users size={24} />
 
-            <span>Usuários</span>
-          </Link>
+              <span>Usuários</span>
+            </Link>
+          </CanSeeComponent>
 
-          <Link path="/add-user">
-            <UserPlus size={24} />
+          <CanSeeComponent roles={[ { name: 'admin' } ]}>
+            <Link path="/add-user">
+              <UserPlus size={24} />
 
-            <span>Adicionar usuário</span>
-          </Link>
+              <span>Adicionar usuário</span>
+            </Link>
+          </CanSeeComponent>
 
           <Link path="/publications">
             <Note size={24} />

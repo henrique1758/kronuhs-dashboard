@@ -9,10 +9,10 @@ export function Header() {
     <HeaderWrapper>
       <Container>
         <h3>
-          E aí {user?.name}, <span>Vamos escrever?</span>
+          E aí {user?.firstName}, <span>Vamos escrever?</span>
         </h3>
 
-        {/* <img src={user?.avatarUrl} alt={`foto de ${user?.name}`} /> */}
+        {/* <img src={user?.avatarUrl} alt={`foto de ${user?.firstName}`} /> */}
       </Container>
     </HeaderWrapper>
   )

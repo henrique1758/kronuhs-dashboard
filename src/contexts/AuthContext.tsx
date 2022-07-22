@@ -20,6 +20,9 @@ interface User {
     lastName: string;
     email: string;
     avatarUrl?: string;
+    roles: {
+        name: string;
+    }[];
 }
 
 interface SignInResponse {
@@ -38,8 +41,8 @@ interface AuthContextData {
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export function signOut(): void {
-    destroyCookie(undefined, '@kronuhs:token')
-    destroyCookie(undefined, '@kronuhs:refresh_token')
+    destroyCookie(undefined, '@kronuhs-dashboard:token')
+    destroyCookie(undefined, '@kronuhs-dashboard:refresh_token')
 
     Router.push('/');
 };
@@ -53,10 +56,8 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
         
         if (token) {
           api
-            .get('blog/users/profile')
-            .then(response => {
-              setUser(response.data)
-            })
+            .get('/dashboard/users/profile')
+            .then(response => setUser(response.data))
             .catch(() => {
               signOut()
             })
@@ -71,7 +72,7 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
                     refresh_token,
                     userData
                 }
-            } = await api.post<SignInResponse>('/blog/session', {
+            } = await api.post<SignInResponse>('/dashboard/session', {
               email,
               password
             });
@@ -90,13 +91,14 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
                 id: userData.id,
                 firstName: userData.firstName,
                 lastName: userData.lastName,
-                email: userData.email,
-                avatarUrl: userData.avatarUrl
+                email,
+                avatarUrl: userData.avatarUrl,
+                roles: userData.roles
             });
 
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-            Router.reload();
+            Router.push('/home');
             
         } catch (err: any) {
             toast.error(err.response.data.message, {

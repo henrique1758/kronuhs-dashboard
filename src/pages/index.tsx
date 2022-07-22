@@ -11,18 +11,23 @@ import {
   SignInContainer,
   InputGroup,
 } from '../styles/pages/signin'
+import { useAuth } from '../hooks'
+import { GetServerSideProps } from 'next'
+import { parseCookies } from 'nookies'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
+  const { signIn } = useAuth()
+
   async function handleSignIn(e: FormEvent) {
     e.preventDefault()
 
-    // await signIn({
-    //   email,
-    //   password,
-    // })
+    await signIn({
+      email,
+      password,
+    })
 
     setEmail('')
     setPassword('')
@@ -83,4 +88,22 @@ export default function SignIn() {
       </LogoWrapper>
     </SignInContainer>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+
+  const { '@kronuhs-dashboard:token': token } = parseCookies(ctx);
+
+  if (token) {
+    return {
+      redirect: {
+        destination: '/home',
+        permanent: false
+      }
+    }
+  }
+
+  return {
+    props: {}
+  }
 }

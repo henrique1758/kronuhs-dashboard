@@ -1,12 +1,13 @@
 import axios, { AxiosError } from 'axios'
 import { parseCookies, setCookie } from 'nookies'
 import { signOut } from '../contexts/AuthContext'
+import { AuthTokenError } from './errors/AuthTokenErro';
 
 let cookies = parseCookies()
 let isRefreshing = false;
 let failedRequestsQueue = [];
 
-const { '@kronuhs:token': token } = cookies
+const { '@kronuhs-dashboard:token': token } = cookies;
 
 export const api = axios.create({
   baseURL: 'http://localhost:3333',
@@ -19,38 +20,43 @@ api.interceptors.response.use(response => {
     return response;
   },
   (error: AxiosError) => {    
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401) {        
       if (error.response.data?.message.code === 'token.expired') {
         cookies = parseCookies();
 
-        const { '@kronuhs:refresh_token': refresh_token } = cookies;
+        const { '@kronuhs-dashboard:refresh_token': refreshToken } = cookies;
         const originalConfig = error.config;
 
         if (!isRefreshing) {
           isRefreshing = true;
 
-          api.post('/blog/session/refresh-token', {
-            refresh_token
+          api.post('/dashboard/session/refresh-token', {
+            refreshToken
           }).then(response => {          
-            const newToken = response.data.token;
+            const newToken = response.data.newToken;
+            const newRefreshToken = response.data.newRefreshToken;
   
-            setCookie(undefined, '@kronuhs:token', newToken, {
+            setCookie(undefined, '@kronuhs-dashboard:token', newToken, {
               maxAge: 60 * 60 * 24 * 30,
               path: '/'
             });
   
-            setCookie(undefined, '@kronuhs:refresh_token', response.data.refresh_token, {
+            setCookie(undefined, '@kronuhs-dashboard:refresh_token', newRefreshToken, {
                 maxAge: 60 * 60 * 24 * 30,
                 path: '/'
             });
   
-            api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+            api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
 
             failedRequestsQueue.forEach(request => request.onSuccess(newToken));
             failedRequestsQueue = [];
           }).catch(err => {
             failedRequestsQueue.forEach(request => request.onFailure(err));
             failedRequestsQueue = [];
+
+            if (typeof window === "undefined") {
+              signOut();
+            }
           }).finally(() => {
             isRefreshing = false;
           })
@@ -69,7 +75,9 @@ api.interceptors.response.use(response => {
           })
         })
       } else {
-        signOut();        
+        if (typeof window === "undefined") {
+          signOut();
+        } 
       }
     }
 

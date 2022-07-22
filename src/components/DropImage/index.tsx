@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import imageIlustration from '../../assets/image-ilustration.svg'
 import { DropImageContainer, Wrapper } from './styles'
 
 interface DropImageProps {
@@ -17,7 +16,7 @@ export function DropImage({ onChangeImage }: DropImageProps) {
       isDragin={isDraging}
     >
       <Wrapper>
-        <img src={imageIlustration} alt="image ilustration" />
+        <img src="/image-ilustration.svg" alt="image ilustration" />
 
         <p>
           Arraste e solte uma image ou <label htmlFor="photo">Procure</label>

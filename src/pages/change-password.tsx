@@ -1,3 +1,3 @@
 export default function ChangePassword() {
-    return <h1>Add user</h1>
+    return <h1>Change Password</h1>
 }
